@@ -21,7 +21,7 @@ def computeClusteringInitialPoints(features):
     initial_centroids = np.array([
         [features[:,0].min(), features[:,1].mean()],  # 'S'
         [features[:,0].mean(), features[:,1].max()],  # 'D'
-        [features[:,0].mean(), features[:,1].min()],  # 'U'
+        [features[:,0].mean(), features[:,1].min()],  # 'A'
         [features[:,0].max(), features[:,1].mean()],  # 'L'
     ])
 

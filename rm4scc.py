@@ -1,22 +1,30 @@
-# This file contains the bar codes using in the RM4SCC
+# This file contains the bar codes used in the RM4SCC
 import numpy as np
 
 
 class RM4SCC(object):
+
+    # base symbols
     symbols = (
         'S',  # Short
         'D',  # Descender
         'A',  # Ascender
         'L'   # Long
     )
+
+    # symbol representation
     symbol_bars = (
         ('0', '0'),  # Short
         ('0', '1'),  # Descender
         ('1', '0'),  # Ascender
         ('1', '1'),  # Long
     )
+
+    # control characters
     START = 'A'
     END = 'L'
+
+    # all codes
     BAR_CODES = {
         'DADA': 'A',
         'DLSA': 'B',
@@ -59,13 +67,12 @@ class RM4SCC(object):
     @staticmethod
     def checksum(codeword):
         """Compute the checksum for the codeword specified.
-        The last code of the codeword is considered to be the checksum to check against."""
+        The last code of the codeword is considered to be the checksum to check against and it is skipped."""
         upper = 0
         lower = 0
         weights = np.array([4, 2, 1, 0])
-        checksum_char = codeword.pop()
 
-        for code in codeword:
+        for code in codeword[:-1]:
             symbol = [k for k, v in RM4SCC.BAR_CODES.items() if v == code][0]
             upper += (np.array([1 if c in ('A', 'L') else 0 for c in symbol]) * weights).sum()
             lower += (np.array([1 if c in ('D', 'L') else 0 for c in symbol]) * weights).sum()
@@ -83,8 +90,8 @@ class RM4SCC(object):
                 binary += '0'
             half_sums.append(binary)
 
-        computed_bars = ''.join([RM4SCC.symbols[RM4SCC.symbol_bars.index(t)] for t in zip(*half_sums)])
-        return checksum_char == RM4SCC.BAR_CODES[computed_bars]
+        checksum_char = ''.join([RM4SCC.symbols[RM4SCC.symbol_bars.index(t)] for t in zip(*half_sums)])
+        return RM4SCC.BAR_CODES[checksum_char]
 
     @staticmethod
     def decodeSymbols(symbols):
@@ -94,13 +101,16 @@ class RM4SCC(object):
         :return: codeword as a string
 
         """
-        assert symbols.pop(0) == RM4SCC.START
-        assert symbols.pop(-1) == RM4SCC.END
+        assert len(symbols) > 2 and len(symbols) % 4 == 0, 'Invalid length'
+        assert symbols.pop(0) == RM4SCC.START, 'No "START" symbol'
+        assert symbols.pop(-1) == RM4SCC.END, 'No "END" symbol'
 
         # Group symbols 4 by 4
         codes = zip(*[symbols[i::4] for i in range(4)])
         codeword = [RM4SCC.BAR_CODES[''.join(code)] for code in codes]
 
-        assert RM4SCC.checksum(codeword)
+        checksum = RM4SCC.checksum(codeword)
+        assert codeword[-1] == checksum, 'Checksum failed. Is: {}. Should be: {}.'.\
+            format(codeword[-1], checksum)
 
         return ''.join(codeword)
