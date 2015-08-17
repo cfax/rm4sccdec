@@ -18,7 +18,7 @@ if __name__ == '__main__':
     features = statistics.getFeatures(contours)
     initial_centroids = statistics.computeClusteringInitialPoints(features)
 
-    symbols = statistics.classifySymbols(features, initial_centroids)
+    symbols, centroids = statistics.classifySymbols(features, initial_centroids)
 
     codeword = RM4SCC.decodeSymbols(symbols)
     print codeword
