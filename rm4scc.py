@@ -101,7 +101,7 @@ class RM4SCC(object):
         :return: codeword as a string
 
         """
-        assert len(symbols) > 2 and len(symbols) % 4 == 0, 'Invalid length'
+        assert len(symbols) > 2 and (len(symbols)-2) % 4 == 0, 'Invalid length'
         assert symbols.pop(0) == RM4SCC.START, 'No "START" symbol'
         assert symbols.pop(-1) == RM4SCC.END, 'No "END" symbol'
 
